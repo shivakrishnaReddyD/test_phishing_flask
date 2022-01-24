@@ -54,10 +54,10 @@ def test_valid_signin_logout(test_client):
     THEN check the response is valid
     """
     response = test_client.post('/login',
-                                data=dict(email='patkennedy79@gmail.com', password='FlaskIsAwesome'),
+                                data=dict(email='shivakrishnareddy.si4@gmail.com', password='FlaskIsAwesome'),
                                 follow_redirects=True)
     assert response.status_code == 200
-    assert b'Thanks for logging in, patkennedy79@gmail.com!' in response.data
+    assert b'Thanks for logging in, shivakrishnareddy.si4@gmail.com!' in response.data
     assert b'Flask User Management' in response.data
     assert b'Logout' in response.data
     assert b'Login' not in response.data
