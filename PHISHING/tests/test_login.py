@@ -8,6 +8,14 @@ def test_get_method():
     assert b'username' in response.data
     assert b'password' in response.data
 
+
+def test_logs():
+    response = app.test_client().get('/login',
+                                data=dict(username='dskreddy',
+                                          password='FlskIsGreat'),   # Does NOT match!
+                                follow_redirects=True)
+    assert response.status_code == 200
+
 def test_post_method():
     response = app.test_client().post('/login')
     print(response.data)

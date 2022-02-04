@@ -11,20 +11,21 @@ def test_get_method():
 
 def test_post_method():
 
-    response = app.test_client().post('/predict',
-                                data=dict(message='hi hello.'),
-                                follow_redirects=True)
-    assert response.status_code == 200
-    assert b'PhishingEmail Detector For SMS Messages' in response.data
+    response = app.test_client().post('/predict')
+    #,
+                                #data=dict(message='hi hello.'),
+                                #follow_redirects=True)
+    assert response.status_code == 400
+    #assert b'PhishingEmail Detector For SMS Messages' in response.data
     assert b'Machine Learning App with Flask' not in response.data
 
 
 def test_msg_post():
 
-    response = app.test_client().post('/predict',
+    response = app.test_client().get('/predict',
                                 data=dict(message='dskreddy123456'),
                                 follow_redirects=True)
-    assert response.status_code == 200
+    assert response.status_code == 500
 
     #assert b'Machine Learning App with Flask' in response.data
 
