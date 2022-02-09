@@ -9,6 +9,9 @@ from sklearn.naive_bayes import MultinomialNB
 #from sklearn.externals
 import joblib
 
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB
+
 
 app = Flask(__name__)
 
@@ -16,7 +19,7 @@ app = Flask(__name__)
 
 
 @app.route('/')
-def hello_world():
+def home():
     return render_template("home.html")
 
 @app.route('/logon')
@@ -63,8 +66,43 @@ def signin():
     else:
         return render_template("signup.html")
 
-@app.route('/predict',methods=['POST','GET'])
-def predict():
+    
+
+class mnb:
+
+    def read(self):
+        df= pd.read_csv("PhishingEmail.csv", encoding="latin-1")
+        df.drop(['Unnamed: 2', 'Unnamed: 3', 'Unnamed: 4'], axis=1, inplace=True)
+        # Features and Labels
+        df['label'] = df['v1'].map({'ham': 0, 'spam': 1})
+        df['message']=df['v2']
+        df.drop(['v1','v2'],axis=1,inplace=True)
+        return df
+        
+
+    def train_t(self,df):
+        
+        X = df['message']
+        y = df['label']
+        cv = CountVectorizer()
+        X = cv.fit_transform(X) # Fit the Data
+    
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+        #Naive Bayes Classifier
+        return X_train, X_test, y_train, y_test,cv
+    def mnb_ft(self, data, X_train, X_test, y_train, y_test,cv):
+        
+        clf = MultinomialNB()
+        clf.fit(X_train,y_train)
+        clf.score(X_test,y_test)
+        vect = cv.transform(data).toarray()
+        return clf.predict(vect)
+
+        
+
+'''
+def mnb(data):
+    
 
     df= pd.read_csv("PhishingEmail.csv", encoding="latin-1")
     df.drop(['Unnamed: 2', 'Unnamed: 3', 'Unnamed: 4'], axis=1, inplace=True)
@@ -78,26 +116,48 @@ def predict():
     # Extract Feature With CountVectorizer
     cv = CountVectorizer()
     X = cv.fit_transform(X) # Fit the Data
-    from sklearn.model_selection import train_test_split
+    
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
     #Naive Bayes Classifier
-    from sklearn.naive_bayes import MultinomialNB
+    #from sklearn.naive_bayes import MultinomialNB
 
     clf = MultinomialNB()
     clf.fit(X_train,y_train)
     clf.score(X_test,y_test)
+    vect = cv.transform(data).toarray()
+    return clf.predict(vect)
+''' 
+    
+  
+
+@app.route('/predict',methods=['POST','GET'])
+def predict():
+
+   
+
 	#Alternative Usage of Saved Model
 	# joblib.dump(clf, 'NB_spam_model.pkl')
 	# NB_spam_model = open('NB_spam_model.pkl','rb')
 	# clf = joblib.load(NB_spam_model)
+    
+    message = request.form['message']
+    data = [message]
 
+    obj1 = mnb()
+    df = obj1.read()
+    X_train, X_test, y_train, y_test,cv = obj1.train_t(df)
+    nb = obj1.mnb_ft(data,X_train, X_test, y_train, y_test,cv)
+    #cv = CountVectorizer()
     if request.method == 'POST':
-	    message = request.form['message']
-	    data = [message]
-	    vect = cv.transform(data).toarray()
-	    my_prediction = clf.predict(vect)
+	    #message = request.form['message']
+        
+	    #data = [message]
+        #nb = mnb(data)
+	    my_prediction = nb#mnb(data)
     return render_template('result.html',prediction = my_prediction)
     	
+
+       
    
 
 @app.route('/about')
